@@ -1,0 +1,9 @@
+# config.py
+BLOCK_TIME_SEC = 150
+INITIAL_DIFFICULTY_TARGET = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+DIFFICULTY_ADJUSTMENT_INTERVAL = 10
+REWARD = 125
+MAX_SUPPLY = 21_000_000
+VESTING_PERIODS = [0, 4032, 8064, 12096, 16128]
+NETWORK_NAME = "WorldKitCoin"
+CURRENCY_SYMBOL = "WKC"
