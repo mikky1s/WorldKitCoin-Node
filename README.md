@@ -143,3 +143,12 @@ worldkitcoin-node/
 
 Ошибка "Invalid block"
 Убедитесь, что майнер использует правильный merkle_root. В stratum_server.py в handle_submit используйте compute_hash=False.
+
+## Для разработчиков
+1. Форкните репозиторий.
+
+2. Создайте ветку для изменений.
+
+3. Внесите изменения и протестируйте.
+
+4. Отправьте Pull Request.
