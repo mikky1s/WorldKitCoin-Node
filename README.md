@@ -98,3 +98,48 @@ http://localhost:5000/info
 - Все ответы возвращаются в формате JSON.  
 - Для `POST /transaction` обязательные поля: `from` (адрес отправителя), `to_pubkey` (публичный ключ получателя), `amount` (целое число), `private_key` (hex-строка).  
 - Для `POST /mine` укажите адрес кошелька, на который будет зачислена награда.
+
+## Подключение майнеров
+## Майнеры подключаются через Stratum-протокол:
+
+```text
+stratum+tcp://<ваш_IP>:3333
+```
+## Пример для локальной сети:
+
+```text
+stratum+tcp://127.0.0.1:3333
+```
+## Порт 3333 должен быть открыт.
+
+## Структура проекта
+```text
+worldkitcoin-node/
+├── main.py               # точка входа
+├── blockchain.py         # логика блокчейна
+├── block.py              # класс блока
+├── transaction.py        # транзакции
+├── stratum_server.py     # Stratum-пул
+├── p2p.py                # P2P-сеть
+├── api.py                # HTTP API
+├── miner.py              # встроенный майнер (тест)
+├── utils.py              # вспомогательные функции
+├── config.py             # настройки сети
+├── requirements.txt      # зависимости
+└── README.md             # этот файл
+```
+## Устранение проблем
+Ошибка "ModuleNotFoundError"
+Установите зависимости: pip install -r requirements.txt
+
+Ошибка "Address already in use"
+Закройте программы, использующие порты 3333, 5000 или 8333, или измените порты в config.py.
+
+Нода не синхронизируется
+Удалите blockchain_data.json и перезапустите ноду.
+
+Майнер не подключается
+Проверьте, что порт 3333 открыт и сервер запущен.
+
+Ошибка "Invalid block"
+Убедитесь, что майнер использует правильный merkle_root. В stratum_server.py в handle_submit используйте compute_hash=False.
