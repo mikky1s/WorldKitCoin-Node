@@ -153,3 +153,99 @@ These endpoints are available via HTTP (or HTTPS) and do not require authorizati
 | /utxos/<address> | GET | The UTXO list for the address |
 | /create_transaction | POST | Create and sign a transaction |
 | /send_transaction | POST | Send the transaction to the mempool |
+
+Important: The private key for /create_transaction is passed in the request body. Use this endpoint only in a secure environment (such as locally or with HTTPS).
+
+## ⛏️ Mining
+##CPU mining
+The built-in miner starts automatically (unless --no-mine is specified).
+It uses the transaction pool from the mempool and tries to find a block for the specified address.
+
+## ASIC mining (Stratum)
+Start a node with --stratum-port 3333 and configure your ASIC miner to the address:
+
+```text
+stratum+tcp://<IP_node>:3333
+```
+The miner must support the Stratum v1. protocol.
+After authorization, it will receive tasks (mining.notify) and send solutions (mining.submit).
+
+## 🔗 P2P network
+The node automatically connects to other nodes via port 8333.
+The list of known peers is stored in known_peers.json.
+Supported:
+
++ Block and transaction exchange
+
++ Chain synchronization
+
++ IP ban when limits are exceeded
+
++ Periodic reconnect
+
++ To manually connect to a peer:
+
+```bash
+python main.py --connect 192.168.1.10:8333
+```
+
+## 🧪 Testing
+Run all tests:
+
+```bash
+python -m unittest tests.py
+```
+Coverage includes:
+
++ Serialization/deserialization
+
++ Signatures and verification
+
++ Adding blocks
+
++ Mempool and UTXO operations
+
++API (partially)
+
++ P2P (skipped on Windows, but working)
+
+## Technical details
+The consensus algorithm
++ Proof‑of‑Work – SHA‑256d, the target is recalculated every 10 blocks.
+
++ The maximum change in difficulty is 4 times.
+
++ The block time is 150 seconds (configurable).
+
+## Reward and vesting
++ The reward for the block is 125 WKC.
+
++ Distributed into 5 parts with lock periods: [0, 4032, 8064, 12096, 16128] blocks.
+
++ Total supply is 21,000,000 WKC.
+
+## Keeping
++ The blockchain is saved in a binary file blockchain_data.bin using msgpack + zlib + sha256 checksum.
+
+## 🤝 Contribution
+The project is open for improvements!
+ If you find a bug or want to add a new feature, create an Issue or Pull Request.
+
+Follow these guidelines:
+
++ Use PEP‑8 code style
+
++ Document new features
+
++ Write tests
+
+## 📄 License
+The project is distributed under the MIT license. Details in the LICENSE file.
+
+## 🙏 Thanks
+ Inspired by Bitcoin and its open ecosystem.
+
+ Uses libraries: ecdsa, cryptography, bip_utils, msgpack, flask, requests.
+
+## If the project is useful to you, give it a ⭐ on GitHub!
+ 
