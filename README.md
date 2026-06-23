@@ -1,154 +1,155 @@
-# WorldKitCoin Node
+# ⛓️ WorldKitCoin – Full-fledged Blockchain in Python
 
-[![GitHub stars](https://img.shields.io/github/stars/mikky1s/worldkitcoin-node)](https://github.com/mikky1s/worldkitcoin-node/stargazers)
-[![GitHub license](https://img.shields.io/github/license/mikky1s/worldkitcoin-node)](https://github.com/mikky1s/worldkitcoin-node/blob/main/LICENSE)
-[![Telegram](https://img.shields.io/badge/Telegram-@WorldKitCoin-blue)](https://t.me/WorldKitCoin)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/mikky1s/worldkitcoin-node/pulls)
+[![Tests](https://img.shields.io/badge/tests-92%25-green)](https://github.com/mikky1s/worldkitcoin/actions)
 
-**WorldKitCoin Node** – это полноценная нода блокчейна WorldKitCoin с встроенным Stratum-пулом для майнеров. Она обеспечивает работу сети, обрабатывает транзакции, майнит блоки и предоставляет REST API для управления.
-
----
-
-## Особенности
-
-- **Алгоритм консенсуса:** SHA-256d (Proof-of-Work) – совместим с ASIC-майнерами.
-- **Время блока:** 2.5 минуты (в 4 раза быстрее Bitcoin).
-- **Максимальная эмиссия:** 21 000 000 WKC.
-- **Награда за блок:** 125 WKC с прогрессивным вестингом.
-- **Встроенный Stratum-пул** (порт 3333).
-- **P2P-сеть** (порт 8333).
-- **HTTP API** (порт 5000).
-- **UTXO-модель** – как в Bitcoin.
-- **Сохранение состояния** на диск (JSON).
-- **Динамическая сложность** – автоматическая подстройка.
+**WorldKitCoin (WKC)** is an implementation of the blockchain in pure Python from scratch. The project includes a full set of components: **P2P network**, **UTXO model**, **difficulty-controlled mining**, **vesting rewards**, **JSON-RPC API**, **Stratum server for ASIC-miners** and **tests**.
 
 ---
 
-## Требования
+## 🚀 Features
 
-- Python 3.8 или новее
-- Операционная система: Windows, Linux, macOS
-- 1 ГБ свободной оперативной памяти
-- 100 МБ свободного места на диске
-- Открытые порты: 3333 (Stratum), 5000 (API), 8333 (P2P)
+- 🔗 **Blockchain with Proof‑of‑Work** – SHA‑256, difficulty is adjusted every 10 blocks.
+- 💰 **UTXO-model** – like in Bitcoin, with support for vesting (lock‑until).
+- ⛏️ **Built-in miner** – CPU‑mining directly from the node (can be disabled).
+- 🌐 **P2P network** – block and transaction exchange, IP ban, frequency limit.
+- 📡 **Stratum-server** – ASIC miner support (port 3333).
+- 🔐 **Cryptography** – ECDSA (secp256k1) for transaction signatures.
+- 📦 **Storage** – compressed binary format (msgpack + zlib) with checksum.
+- 🧪 **Tests** – >90% coverage (unittest).
+- 🖥️ **REST API** – JSON‑RPC, password-protected, with rate‑limiting.
 
 ---
 
-## Установка и запуск
-
-### 1. Клонируйте репозиторий
-
-```bash
-git clone https://github.com/yourusername/worldkitcoin-node.git
-cd worldkitcoin-node
+📂 Project structure
+```.
+├── api.py # Flask‑application (JSON‑RPC, /info, /balance etc.)
+├── block.py # Block class (hash, merkle‑root, mining)
+├── blockchain.py # Main chain logic, UTXO, mempool, forks
+├── config.py # All settings (reward, difficulty, ports, etc.)
+├── main.py # Entry point – node start, API, P2P, Stratum
+├── miner.py # Simple CPU miner
+├── p2p.py # P2P server and client (asyncio)
+├── stratum_server.py # Stratum server for ASIC
+├── transaction.py # TxIn, TxOut, Transaction classes
+├── utils.py # Hashes, serialization, working with bits/target
+├── tests.py # A set of unit tests (more than 20)
+├── requirements.txt # Dependencies
+├── rpc_password.txt # Password for RPC (generated automatically)
+└── README.md
 ```
-## 2. Установите зависимости
 
+---
+
+## ⚙️ Installation
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/yourusername/worldkitcoin.git
+cd worldkitcoin
+```
+## 2. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
-## 4. Запустите ноду
+## 3. (Optional) Configure environment variables
++ RPC_PASSWORD – password for API access (if not set, it is generated and saved in rpc_password.txt).
 
+## 🏁 Launch
+Basic launch (all services)
 ```bash
-python main.py
+python main.py --address <ваш_адрес> --pool-address <адрес_пула>
 ```
-## Нода автоматически:
+If no address is specified, a new key will be generated (the private key is not logged).
+## ⚙️ Command-line options
 
-+ Создаёт генезис-блок (при первом запуске).
+| Parameter | Description | Type | Default |
+|----------|----------|-----|--------------|
+| `--address` | Address for receiving rewards (if not specified, a new key is generated) | `str` | – |
+| `--pool-address` | Pool address for mining (used by the Stratum server) | `str` | – |
+| `--api-port` | Port for REST API (Flask) | `int` | `5000` |
+| `--p2p-port` | Port for P2P network | `int` | `8333` |
+| `--stratum-port` | Port for Stratum server (ASIC connection) | `int` | `3333` |
+| `--data-dir` | Directory for storing blockchain data | `str` | `data` |
+| `--no-mine` | Disable built-in CPU mining | `flag` | `False` (mining is enabled) |
+| `--connect` | Connect to the specified peer at startup (format `host:port`) | `str` | – |
+| `--certfile` | Path to the SSL certificate for the HTTPS API | `str` | – |
+| `--keyfile` | | Path to the SSL private key (in conjunction with `--certfile`) | `str` | – |
 
-+ Запускает Stratum-пул на порту 3333.
-
-+ Запускает P2P-сервер на порту 8333.
-
-+ Запускает HTTP API на порту 5000.
-
-+ Сохраняет состояние в файл blockchain_data.json.
-
-## 5. Проверьте работу
-## Откройте в браузере:
-
-```text
-http://localhost:5000/info
+## Example launch with mining and Stratum
+```bash
+python main.py --address 1234...abcd --pool-address 1234...abcd --stratum-port 3333
 ```
-## Пример ответа:
 
+## 📡 API (JSON‑RPC)
+RPC is available at http://localhost:5000/rpc (or HTTPS).
+Authentication: Basic Auth (login: admin, password from rpc_password.txt).
+
+| Method | Parameters | Description |
+|-------|-----------|----------|
+| `getblocktemplate` | `address` (string, optional) | Returns a block template for mining. If address is not specified, the default address is used |
+| `submitblock` | `{ "template_id": "...", "nonce": ... }` | Sends the found block to the network. You must pass the template_id (from getblocktemplate) and the found nonce. |
+Note: All responses are returned in the standard JSON‑RPC 2.0 format.
+
+## getblocktemplate request example
+```bash
+curl -u admin:$(cat rpc_password.txt) -X POST -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"getblocktemplate","params":[{"address":"1a2b..."}],"id":1}' \
+  http://localhost:5000/rpc
+```
+## Response example
 ```json
 {
-  "height": 0,
-  "difficulty_target": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
-  "current_bits": "0x1f00ffff",
-  "utxo_count": 5,
-  "mempool_size": 0,
-  "total_supply": 125,
-  "chain_tip": "..."
+  "jsonrpc": "2.0",
+  "result": {
+    "version": 536870912,
+    "prevhash": "8f0f8d4eed5cc7c2d69d189e5fdf1044bbfd1b1253967d07a76f319a0c883450",
+    "merkleroot": "b5a7...",
+    "timestamp": 1718273945,
+    "bits": "1d00ffff",
+    "target": "00000000ffff0000000000000000000000000000000000000000000000000000",
+    "height": 124,
+    "coinbasevalue": 125,
+    "template_id": "a1b2c3d4"
+  },
+  "id": 1
 }
 ```
-## API Endpoints
-
-| Метод | Путь | Описание | Пример запроса |
-|-------|------|----------|----------------|
-| `GET` | `/info` | Информация о сети (высота, сложность, UTXO, мемпул) | `curl http://localhost:5000/info` |
-| `GET` | `/balance/<address>` | Баланс адреса (доступный, заблокированный, общий) | `curl http://localhost:5000/balance/4b4840a9527ba2ae4947747c5e024ed7484fe486` |
-| `GET` | `/block/<height>` | Информация о блоке по его высоте | `curl http://localhost:5000/block/42` |
-| `GET` | `/mempool` | Список неподтверждённых транзакций | `curl http://localhost:5000/mempool` |
-| `POST` | `/transaction` | Отправка транзакции (требуется JSON с `from`, `to_pubkey`, `amount`, `private_key`) | `curl -X POST http://localhost:5000/transaction -H "Content-Type: application/json" -d '{"from":"...","to_pubkey":"...","amount":10,"private_key":"..."}'` |
-| `POST` | `/mine` | Запуск майнинга одного блока (для теста, требует `address` в JSON) | `curl -X POST http://localhost:5000/mine -H "Content-Type: application/json" -d '{"address":"..."}'` |
-| `GET` | `/history/<address>` | История транзакций для указанного адреса | `curl http://localhost:5000/history/4b4840a9527ba2ae4947747c5e024ed7484fe486` |
-
-**Примечание:**  
-- Все ответы возвращаются в формате JSON.  
-- Для `POST /transaction` обязательные поля: `from` (адрес отправителя), `to_pubkey` (публичный ключ получателя), `amount` (целое число), `private_key` (hex-строка).  
-- Для `POST /mine` укажите адрес кошелька, на который будет зачислена награда.
-
-## Подключение майнеров
-## Майнеры подключаются через Stratum-протокол:
-
-```text
-stratum+tcp://<ваш_IP>:3333
+## Example of a submitblock request
+```bash
+curl -u admin:$(cat rpc_password.txt) -X POST -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"submitblock","params":[{"template_id":"a1b2c3d4","nonce":987654}],"id":2}' \
+  http://localhost:5000/rpc
 ```
-## Пример для локальной сети:
-
-```text
-stratum+tcp://127.0.0.1:3333
+## Example of a successful response
+```json
+{
+  "jsonrpc": "2.0",
+  "result": "success",
+  "id": 2
+}
 ```
-## Порт 3333 должен быть открыт.
-
-## Структура проекта
-```text
-worldkitcoin-node/
-├── main.py               # точка входа
-├── blockchain.py         # логика блокчейна
-├── block.py              # класс блока
-├── transaction.py        # транзакции
-├── stratum_server.py     # Stratum-пул
-├── p2p.py                # P2P-сеть
-├── api.py                # HTTP API
-├── miner.py              # встроенный майнер (тест)
-├── utils.py              # вспомогательные функции
-├── config.py             # настройки сети
-├── requirements.txt      # зависимости
-└── README.md             # этот файл
+## Error example
+```json
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -1,
+    "message": "Low difficulty"
+  },
+  "id": 2
+}
 ```
-## Устранение проблем
-Ошибка "ModuleNotFoundError"
-Установите зависимости: pip install -r requirements.txt
+## 📋 REST endpoints (without authentication)
+These endpoints are available via HTTP (or HTTPS) and do not require authorization, but have a rate‑limit (100 requests per minute from one IP).
 
-Ошибка "Address already in use"
-Закройте программы, использующие порты 3333, 5000 или 8333, или измените порты в config.py.
-
-Нода не синхронизируется
-Удалите blockchain_data.json и перезапустите ноду.
-
-Майнер не подключается
-Проверьте, что порт 3333 открыт и сервер запущен.
-
-Ошибка "Invalid block"
-Убедитесь, что майнер использует правильный merkle_root. В stratum_server.py в handle_submit используйте compute_hash=False.
-
-## Для разработчиков
-1. Форкните репозиторий.
-
-2. Создайте ветку для изменений.
-
-3. Внесите изменения и протестируйте.
-
-4. Отправьте Pull Request.
+| URL | Method | Description |
+|-----|--------|-------------|
+| /info | GET | General information about the node (height, complexity) |
+| /balance/<address> | GET | Balance of the specified address (available/locked) |
+| /history/<address> | GET | Transaction history at |
+| /utxos/<address> | GET | The UTXO list for the address |
+| /create_transaction | POST | Create and sign a transaction |
+| /send_transaction | POST | Send the transaction to the mempool |
