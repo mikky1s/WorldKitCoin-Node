@@ -19,17 +19,14 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Хранилище шаблонов: {template_id: template_data}
 _templates = {}
 _templates_lock = threading.Lock()
-_TEMPLATE_EXPIRE = 600  # 10 минут
+_TEMPLATE_EXPIRE = 600
 
-# Rate limiting
 _rate_limit = {}
 _rate_limit_lock = threading.Lock()
 
 def load_rpc_password() -> str:
-    """Загружает пароль из переменной окружения RPC_PASSWORD, иначе из файла, иначе генерирует новый."""
     env_pass = os.environ.get('RPC_PASSWORD')
     if env_pass:
         logger.info("RPC-пароль загружен из переменной окружения")
@@ -88,7 +85,6 @@ def handle_getblocktemplate(params, msg_id):
         address = "miner"
 
     with _templates_lock:
-        # Удаляем устаревшие шаблоны
         now = time.time()
         for tid in list(_templates.keys()):
             if now - _templates[tid]['created_at'] > _TEMPLATE_EXPIRE:
@@ -96,7 +92,15 @@ def handle_getblocktemplate(params, msg_id):
 
         last = bc.get_last_block()
         new_height = last.height + 1
-        coinbase = Transaction.create_coinbase(new_height, REWARD, address, VESTING_PERIODS)
+        # Создаём coinbase с возможностью extra_nonce
+        coinbase = Transaction.create_coinbase(
+            new_height,
+            REWARD,
+            address,
+            VESTING_PERIODS,
+            extra_nonce1=None,
+            extra_nonce2=None  # будет заполнено при майнинге
+        )
         txs = bc.get_mempool_snapshot(100)
         block_txs = [coinbase] + txs
 
@@ -145,7 +149,7 @@ def handle_getblocktemplate(params, msg_id):
         "sigoplimit": MAX_SIGOPS,
         "sizelimit": MAX_BLOCK_SIZE,
         "coinbase_aux": {"flags": "062f503253482f"},
-        "template_id": template_id   # Возвращаем ID для использования в submit
+        "template_id": template_id
     }
     return {"id": msg_id, "jsonrpc": "2.0", "result": result}
 
@@ -161,6 +165,7 @@ def handle_submitblock(params, msg_id):
     nonce = block_data.get('nonce')
     if nonce is None:
         return {"jsonrpc": "2.0", "error": {"code": -32600, "message": "Missing nonce"}, "id": msg_id}
+    extra_nonce2 = block_data.get('extra_nonce2', 0)
 
     with _templates_lock:
         template = _templates.get(template_id)
@@ -171,23 +176,27 @@ def handle_submitblock(params, msg_id):
             return {"jsonrpc": "2.0", "error": {"code": -32000, "message": "Template expired"}, "id": msg_id}
 
         from block import Block
+        # Создаём блок с переданными параметрами
         block = Block(
             height=template['height'],
-            transactions=template['transactions'],
+            transactions=template['transactions'][:],  # копия
             prev_hash=template['prev_hash'],
-            timestamp=template['timestamp'],
+            timestamp=template['timestamp'],о
             nonce=nonce,
             bits=template['bits'],
+            extra_nonce1=None,
+            extra_nonce2=extra_nonce2,
             compute_hash=False
         )
-        block.merkle_root = template['merkle_root']
+        if block.transactions and block.transactions[0].is_coinbase():
+            block.update_coinbase_extra_nonce(extra_nonce2)
+        block.merkle_root = block._compute_merkle_root()
         block.hash = block.compute_hash()
         target = bits_to_target(template['bits'])
         if int(block.hash, 16) >= target:
             return {"jsonrpc": "2.0", "error": {"code": -1, "message": "Low difficulty"}, "id": msg_id}
 
         if bc.add_block(block):
-            # Удаляем использованный шаблон
             del _templates[template_id]
             return {"jsonrpc": "2.0", "result": "success", "id": msg_id}
         else:
