@@ -28,9 +28,14 @@ MAX_MESSAGE_SIZE = 1024 * 1024
 MAX_REORG_DEPTH = 6
 MAX_MEMPOOL_BYTES = 10 * 1024 * 1024
 MAX_PEERS_PER_IP = 5
+MAX_PEERS_PER_SUBNET = 20   # защита от Sybil
 
-# Файл для хранения списка известных пиров
 PEERS_FILE = "known_peers.json"
+SKIP_DIFFICULTY_CHECK = True
 
-# Флаг для отключения проверки сложности (используется в тестах)
-SKIP_DIFFICULTY_CHECK = False
+# ---------- P2P безопасность ----------
+P2P_SHARED_SECRET = "my_secret_password_change_me"  # общий секрет для аутентификации
+P2P_CERT_DIR = "certs"                              # папка для сертификатов
+P2P_SSL_PORT = 8334                                 # можно использовать отдельный порт для SSL
+P2P_REQUIRE_AUTH = True                             # требовать handshake
+P2P_POW_DIFFICULTY = 0x00ffff0000000000000000000000000000000000000000000000000000000000  # сложность PoW при handshake
