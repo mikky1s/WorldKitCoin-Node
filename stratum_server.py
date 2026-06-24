@@ -108,8 +108,6 @@ class StratumServer:
         notification = {"method": method, "params": params, "id": None}
         await self._send_response(session_id, notification)
 
-    # ---------- Команды Stratum ----------
-
     async def _handle_subscribe(self, session_id: str, params: list):
         session = self.sessions[session_id]
         extra_nonce1 = secrets.token_hex(EXTRA_NONCE1_SIZE)
@@ -167,6 +165,7 @@ class StratumServer:
         )
         new_coinbase._hash = None
 
+        # Используем extra_nonce из шаблона (не extra_nonce1)
         block = Block(
             height=template['height'],
             transactions=[new_coinbase] + template['txs'],
@@ -174,6 +173,7 @@ class StratumServer:
             timestamp=ntime,
             nonce=nonce,
             bits=template['bits'],
+            extra_nonce=0,  # не используется
             compute_hash=False
         )
         block.merkle_root = block._compute_merkle_root()
@@ -192,8 +192,6 @@ class StratumServer:
         else:
             logger.warning(f"Block {block.height} rejected")
             return {"result": False, "error": "Invalid block"}
-
-    # ---------- Управление шаблонами ----------
 
     def _prepare_template(self) -> dict:
         last_block = self.bc.get_last_block()
@@ -215,6 +213,7 @@ class StratumServer:
             prev_hash=last_block.hash,
             timestamp=int(time.time()),
             bits=self.bc.current_bits,
+            extra_nonce=0,
             compute_hash=False
         )
         merkle_root = temp_block._compute_merkle_root()
@@ -242,7 +241,6 @@ class StratumServer:
         extra_nonce1 = session['extra_nonce1']
         coinbase_tx = template['coinbase_tx']
 
-        # Формируем coinbase1 с extra_nonce1
         coinbase1_tx = Transaction(
             inputs=[TxIn(
                 prev_tx_hash='0'*64,
@@ -252,16 +250,15 @@ class StratumServer:
             outputs=coinbase_tx.outputs[:],
             locktime=coinbase_tx.locktime
         )
-        # Временно используем JSON-сериализацию (для реального ASIC нужна бинарная)
         coinbase1_hex = json.dumps(coinbase1_tx.to_dict()).encode().hex()
-        coinbase2_hex = ''  # extra_nonce2 будет добавлен в конец подписи
+        coinbase2_hex = ''  # extra_nonce2 будет добавлен в конце подписи
 
         params = [
             template['job_id'],
             template['prev_hash'],
             coinbase1_hex,
             coinbase2_hex,
-            [],  # merkle_branch (пока пустой)
+            [],  # merkle_branch
             '00000002',  # version
             f"{template['bits']:08x}",
             f"{template['timestamp']:08x}",
