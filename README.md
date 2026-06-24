@@ -36,6 +36,8 @@
 ├── transaction.py # TxIn, TxOut, Transaction classes
 ├── utils.py # Hashes, serialization, working with bits/target
 ├── tests.py # A set of unit tests (more than 20)
+├── wallet.py          # Wallet management (create, import, send)
+├── p2p_crypto.py      # SSL certificates and handshake
 ├── requirements.txt # Dependencies
 ├── rpc_password.txt # Password for RPC (generated automatically)
 └── README.md
@@ -58,9 +60,8 @@ pip install -r requirements.txt
 + RPC_PASSWORD – password for API access (if not set, it is generated and saved in rpc_password.txt).
 
 ## 🏁 Launch
-Basic launch (all services)
 ```bash
-python main.py --address <ваш_адрес> --pool-address <адрес_пула>
+python main.py --address 1234...abcd --pool-address 1234...abcd --stratum-port 3333 --no-checkpoints
 ```
 If no address is specified, a new key will be generated (the private key is not logged).
 ## ⚙️ Command-line options
@@ -77,11 +78,40 @@ If no address is specified, a new key will be generated (the private key is not 
 | `--connect` | Connect to the specified peer at startup (format `host:port`) | `str` | – |
 | `--certfile` | Path to the SSL certificate for the HTTPS API | `str` | – |
 | `--keyfile` | | Path to the SSL private key (in conjunction with `--certfile`) | `str` | – |
+| `--no-checkpoints` | Disable checkpoint verification (for development) | `flag` | `False` |
+| `--p2p-no-ssl` | Disable SSL for P2P (not recommended) | `flag` | `False` (SSL enabled) |
 
-## Example launch with mining and Stratum
+## 💳 CLI Wallet
+
+The node includes a built‑in wallet manager for working with addresses and transactions directly from the terminal.
+
+| Command | Description |
+|---------|-------------|
+| `python main.py new` | Generate a new wallet (address + private key) |
+| `python main.py import <private_key>` | Import wallet by private key |
+| `python main.py list` | Show all saved wallets |
+| `python main.py balance <address>` | Show balance (available / locked) |
+| `python main.py send <from> <to> <amount>` | Send WKC to another address |
+| `python main.py history <address>` | Show transaction history |
+
+**Example:**
 ```bash
-python main.py --address 1234...abcd --pool-address 1234...abcd --stratum-port 3333
+python main.py new
+# ✅ New wallet created:
+#    Address: 1a2b...
+#    Private key: 1234...
+#    Public key: abcd...
+
+python main.py balance 1a2b...
+# 💰 Balance of address 1a2b...
+#    Available: 125 WKC
+#    Locked: 0 WKC
+
+python main.py send 1a2b... 3c4d... 10
+# ✅ Transaction sent!
+#    Tx hash: 9f8e...
 ```
+Important: Private keys are stored in data/wallets.json. Never share this file!
 
 ## 📡 API (JSON‑RPC)
 RPC is available at http://localhost:5000/rpc (or HTTPS).
