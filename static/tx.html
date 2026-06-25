@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Транзакция | WorldKitCoin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand text-light" href="/">
+                <span class="badge-network">WKC</span> WorldKitCoin Explorer
+            </a>
+            <a href="/" class="btn btn-sm btn-outline-secondary">← На главную</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="txData">
+            <div class="text-center text-secondary">Загрузка...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        async function loadTx() {
+            const hash = window.location.pathname.split('/').pop();
+            if (!hash || hash === 'tx.html') {
+                document.getElementById('txData').innerHTML = '<div class="alert alert-danger">Не указан хэш транзакции</div>';
+                return;
+            }
+            try {
+                const infoRes = await fetch(`${API_BASE}/info`);
+                const info = await infoRes.json();
+                let found = null;
+                for (let h = 0; h <= info.height; h++) {
+                    const br = await fetch(`${API_BASE}/block/${h}`);
+                    if (br.ok) {
+                        const b = await br.json();
+                        if (b.transactions.includes(hash)) {
+                            found = { block_height: h, block_hash: b.hash, timestamp: b.timestamp };
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    document.getElementById('txData').innerHTML = '<div class="alert alert-danger">Транзакция не найдена</div>';
+                    return;
+                }
+                document.getElementById('txData').innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Транзакция</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3 text-secondary">Хэш</div>
+                                <div class="col-9"><span class="hash-text">${hash}</span></div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3 text-secondary">Блок</div>
+                                <div class="col-9"><a href="/block/${found.block_hash}">#${found.block_height}</a></div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3 text-secondary">Время</div>
+                                <div class="col-9">${new Date(found.timestamp * 1000).toLocaleString('ru-RU')}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3 text-secondary">Подтверждений</div>
+                                <div class="col-9">${info.height - found.block_height + 1}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">Подробности транзакции (входы/выходы) доступны через API /block/${found.block_height}</div>
+                `;
+                document.title = `Транзакция ${hash.slice(0,10)} | WorldKitCoin`;
+            } catch (e) {
+                document.getElementById('txData').innerHTML = `<div class="alert alert-danger">Ошибка: ${e.message}</div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTx);
+    </script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+flask
+ecdsa
+cryptography
+bip_utils

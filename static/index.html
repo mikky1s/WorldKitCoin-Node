@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorldKitCoin Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand text-light" href="/">
+                <span class="badge-network">WKC</span> WorldKitCoin Explorer
+            </a>
+            <div class="ms-auto">
+                <span class="text-secondary" id="networkStatus">Сеть: <span class="text-success">● Онлайн</span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Поиск -->
+        <div class="row mb-4">
+            <div class="col-md-8 mx-auto">
+                <div class="input-group">
+                    <input type="text" class="form-control bg-dark text-light border-secondary" id="searchInput" placeholder="Поиск по хэшу блока или транзакции...">
+                    <button class="btn btn-outline-secondary" id="searchBtn">Найти</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="row mb-4" id="statsRow">
+            <div class="col-md-2 col-6 mb-2">
+                <div class="stat-card">
+                    <div class="number" id="height">-</div>
+                    <div class="label">Высота</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-2">
+                <div class="stat-card">
+                    <div class="number" id="hashrate">-</div>
+                    <div class="label">Хешрейт (H/s)</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-2">
+                <div class="stat-card">
+                    <div class="number" id="difficulty">-</div>
+                    <div class="label">Сложность</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-2">
+                <div class="stat-card">
+                    <div class="number" id="supply">-</div>
+                    <div class="label">Эмиссия (WKC)</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-2">
+                <div class="stat-card">
+                    <div class="number" id="mempool">-</div>
+                    <div class="label">Мемпул</div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-2">
+                <div class="stat-card">
+                    <div class="number" id="utxoCount">-</div>
+                    <div class="label">UTXO</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список блоков -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Последние блоки</span>
+                <span class="badge bg-secondary" id="blockCount">0</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Высота</th>
+                                <th>Хэш</th>
+                                <th>Время</th>
+                                <th>Транзакции</th>
+                                <th>Nonce</th>
+                            </tr>
+                        </thead>
+                        <tbody id="blocksTableBody">
+                            <tr><td colspan="5" class="text-center text-secondary">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <button class="btn btn-sm btn-outline-secondary" id="prevPageBtn" disabled>← Назад</button>
+                <span id="pageInfo">Страница 1</span>
+                <button class="btn btn-sm btn-outline-secondary" id="nextPageBtn">Вперёд →</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>

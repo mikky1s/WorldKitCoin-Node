@@ -1,0 +1,86 @@
+body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.navbar {
+    background: #161b22 !important;
+    border-bottom: 1px solid #30363d;
+}
+.card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+}
+.card-header {
+    background: #0d1117;
+    border-bottom: 1px solid #30363d;
+}
+.table {
+    color: #c9d1d9;
+}
+.table-hover tbody tr:hover {
+    background: #1c2128;
+}
+.hash-text {
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+    background: #0d1117;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+.badge-network {
+    background: #238636;
+    color: white;
+}
+.stat-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+}
+.stat-card .number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #58a6ff;
+}
+.stat-card .label {
+    font-size: 0.9rem;
+    color: #8b949e;
+}
+.pagination .page-link {
+    background: #161b22;
+    border-color: #30363d;
+    color: #c9d1d9;
+}
+.pagination .page-item.active .page-link {
+    background: #238636;
+    border-color: #238636;
+}
+.pagination .page-item.disabled .page-link {
+    background: #0d1117;
+    color: #484f58;
+}
+a {
+    color: #58a6ff;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+    color: #79c0ff;
+}
+.tx-input, .tx-output {
+    background: #0d1117;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    border-left: 3px solid #30363d;
+}
+.tx-input.used {
+    border-left-color: #d29922;
+}
+.tx-output.used {
+    border-left-color: #da3633;
+}
