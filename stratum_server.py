@@ -19,6 +19,14 @@ class StratumServer:
         self.job_id_counter = 0
         self.extra_nonce1 = 0
 
+    def get_miner_count(self) -> int:
+        """Возвращает количество активных майнеров, подключенных к пулу"""
+        return len(self.clients)
+
+    def get_miner_addresses(self) -> list:
+        """Возвращает список адресов (username) активных майнеров"""
+        return [client.get('username', 'unknown') for client in self.clients.values() if client.get('authorized')]
+
     async def handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         client_addr = writer.get_extra_info('peername')
         print(f"🔌 Майнер подключился: {client_addr}")
