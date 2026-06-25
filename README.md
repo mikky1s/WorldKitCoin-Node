@@ -1,281 +1,152 @@
-# ⛓️ WorldKitCoin – Full-fledged Blockchain in Python
+# WorldKitCoin — простой блокчейн для всех 🚀
+### WorldKitCoin (WKC) — это учебная блокчейн-сеть, созданная чтобы показать, как работают криптовалюты.
+Вы можете майнить монеты, создавать кошельки, отправлять переводы и смотреть всё в веб‑эксплорере — прямо как в настоящем Bitcoin, только проще и понятнее.
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/mikky1s/worldkitcoin-node/pulls)
-[![Tests](https://img.shields.io/badge/tests-92%25-green)](https://github.com/mikky1s/worldkitcoin/actions)
+## Что умеет WorldKitCoin?
++ ✅ Собственный кошелёк — создавайте адреса и храните монеты.
 
-**WorldKitCoin (WKC)** is an implementation of the blockchain in pure Python from scratch. The project includes a full set of components: **P2P network**, **UTXO model**, **difficulty-controlled mining**, **vesting rewards**, **JSON-RPC API**, **Stratum server for ASIC-miners** and **tests**.
++ ✅ Майнинг — добывайте новые блоки и получайте награду.
 
----
++ ✅ Отправка транзакций — переводите WKC другим людям.
 
-## 🚀 Features
++ ✅ Веб‑эксплорер — смотрите все блоки, балансы и хешрейт в браузере.
 
-- 🔗 **Blockchain with Proof‑of‑Work** – SHA‑256, difficulty is adjusted every 10 blocks.
-- 💰 **UTXO-model** – like in Bitcoin, with support for vesting (lock‑until).
-- ⛏️ **Built-in miner** – CPU‑mining directly from the node (can be disabled).
-- 🌐 **P2P network** – block and transaction exchange, IP ban, frequency limit.
-- 📡 **Stratum-server** – ASIC miner support (port 3333).
-- 🔐 **Cryptography** – ECDSA (secp256k1) for transaction signatures.
-- 📦 **Storage** – compressed binary format (msgpack + zlib) with checksum.
-- 🧪 **Tests** – >90% coverage (unittest).
-- 🖥️ **REST API** – JSON‑RPC, password-protected, with rate‑limiting.
++ ✅ P2P‑сеть — ноды обмениваются блоками, как в биткоине.
 
----
++ ✅ Stratum‑пул — подключайте майнеры по протоколу Stratum.
 
-📂 Project structure
-```.
-├── api.py # Flask‑application (JSON‑RPC, /info, /balance etc.)
-├── block.py # Block class (hash, merkle‑root, mining)
-├── blockchain.py # Main chain logic, UTXO, mempool, forks
-├── config.py # All settings (reward, difficulty, ports, etc.)
-├── main.py # Entry point – node start, API, P2P, Stratum
-├── miner.py # Simple CPU miner
-├── p2p.py # P2P server and client (asyncio)
-├── stratum_server.py # Stratum server for ASIC
-├── transaction.py # TxIn, TxOut, Transaction classes
-├── utils.py # Hashes, serialization, working with bits/target
-├── tests.py # A set of unit tests (more than 20)
-├── wallet.py          # Wallet management (create, import, send)
-├── p2p_crypto.py      # SSL certificates and handshake
-├── requirements.txt # Dependencies
-├── rpc_password.txt # Password for RPC (generated automatically)
-└── README.md
-```
++ ✅ REST API — управляйте всем через HTTP‑запросы.
 
----
+## 📦 Что нужно для запуска
++ Установленные Python 3.10+ и Git.
++ Минимум 2 ГБ ОЗУ, 10 ГБ дискового пространства.
++ Открытые порты (если хотите, чтобы другие могли подключаться).
 
-## ⚙️ Installation
-
-### 1. Clone the repository
+## ⚡ Быстрый старт
+### 1. Клонируйте репозиторий
 ```bash
-git clone https://github.com/yourusername/worldkitcoin.git
-cd worldkitcoin
+git clone https://github.com/mikky1s/worldkitcoin-node.git
+cd worldkitcoin-node
 ```
-## 2. Install dependencies
+### 2. Установите зависимости
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
-## 3. (Optional) Configure environment variables
-+ RPC_PASSWORD – password for API access (if not set, it is generated and saved in rpc_password.txt).
-
-## 🏁 Launch
+### 3. Запустите ноду
 ```bash
-python main.py --address 1234...abcd --pool-address 1234...abcd --stratum-port 3333 --no-checkpoints
+python3 main.py
 ```
-If no address is specified, a new key will be generated (the private key is not logged).
-## ⚙️ Command-line options
+После запуска вы увидите:
 
-| Parameter | Description | Type | Default |
-|----------|----------|-----|--------------|
-| `--address` | Address for receiving rewards (if not specified, a new key is generated) | `str` | – |
-| `--pool-address` | Pool address for mining (used by the Stratum server) | `str` | – |
-| `--api-port` | Port for REST API (Flask) | `int` | `5000` |
-| `--p2p-port` | Port for P2P network | `int` | `8333` |
-| `--stratum-port` | Port for Stratum server (ASIC connection) | `int` | `3333` |
-| `--data-dir` | Directory for storing blockchain data | `str` | `data` |
-| `--no-mine` | Disable built-in CPU mining | `flag` | `False` (mining is enabled) |
-| `--connect` | Connect to the specified peer at startup (format `host:port`) | `str` | – |
-| `--certfile` | Path to the SSL certificate for the HTTPS API | `str` | – |
-| `--keyfile` | | Path to the SSL private key (in conjunction with `--certfile`) | `str` | – |
-| `--no-checkpoints` | Disable checkpoint verification (for development) | `flag` | `False` |
-| `--p2p-no-ssl` | Disable SSL for P2P (not recommended) | `flag` | `False` (SSL enabled) |
+Адрес и приватный ключ генезис‑кошелька (сохраните их!).
 
-## 💳 CLI Wallet
+Сообщения о запуске P2P, Stratum и API.
 
-The node includes a built‑in wallet manager for working with addresses and transactions directly from the terminal.
+Теперь ваш блокчейн работает локально!
+Откройте браузер и перейдите на http://localhost:5000 — там вы увидите эксплорер.
 
-| Command | Description |
-|---------|-------------|
-| `python main.py new` | Generate a new wallet (address + private key) |
-| `python main.py import <private_key>` | Import wallet by private key |
-| `python main.py list` | Show all saved wallets |
-| `python main.py balance <address>` | Show balance (available / locked) |
-| `python main.py send <from> <to> <amount>` | Send WKC to another address |
-| `python main.py history <address>` | Show transaction history |
-
-**Example:**
+## 👛 Как пользоваться кошельком
+### Создать кошелёк
 ```bash
-python main.py new
-# ✅ New wallet created:
-#    Address: 1a2b...
-#    Private key: 1234...
-#    Public key: abcd...
-
-python main.py balance 1a2b...
-# 💰 Balance of address 1a2b...
-#    Available: 125 WKC
-#    Locked: 0 WKC
-
-python main.py send 1a2b... 3c4d... 10
-# ✅ Transaction sent!
-#    Tx hash: 9f8e...
+curl -X POST http://localhost:5000/wallet/create
 ```
-Important: Private keys are stored in data/wallets.json. Never share this file!
+Вы получите address (ваш публичный ключ) и private_key.
+Никому не показывайте приватный ключ!
 
-## 📡 API (JSON‑RPC)
-RPC is available at http://localhost:5000/rpc (or HTTPS).
-Authentication: Basic Auth (login: admin, password from rpc_password.txt).
-
-| Method | Parameters | Description |
-|-------|-----------|----------|
-| `getblocktemplate` | `address` (string, optional) | Returns a block template for mining. If address is not specified, the default address is used |
-| `submitblock` | `{ "template_id": "...", "nonce": ... }` | Sends the found block to the network. You must pass the template_id (from getblocktemplate) and the found nonce. |
-Note: All responses are returned in the standard JSON‑RPC 2.0 format.
-
-## getblocktemplate request example
+### Проверить баланс
 ```bash
-curl -u admin:$(cat rpc_password.txt) -X POST -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"getblocktemplate","params":[{"address":"1a2b..."}],"id":1}' \
-  http://localhost:5000/rpc
+curl http://localhost:5000/wallet/<адрес>/balance
 ```
-## Response example
-```json
-{
-  "jsonrpc": "2.0",
-  "result": {
-    "version": 536870912,
-    "prevhash": "8f0f8d4eed5cc7c2d69d189e5fdf1044bbfd1b1253967d07a76f319a0c883450",
-    "merkleroot": "b5a7...",
-    "timestamp": 1718273945,
-    "bits": "1d00ffff",
-    "target": "00000000ffff0000000000000000000000000000000000000000000000000000",
-    "height": 124,
-    "coinbasevalue": 125,
-    "template_id": "a1b2c3d4"
-  },
-  "id": 1
-}
-```
-## Example of a submitblock request
+### Отправить монеты
 ```bash
-curl -u admin:$(cat rpc_password.txt) -X POST -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"submitblock","params":[{"template_id":"a1b2c3d4","nonce":987654}],"id":2}' \
-  http://localhost:5000/rpc
+curl -X POST http://localhost:5000/wallet/<ваш_адрес>/send \
+  -H "Content-Type: application/json" \
+  -d '{"to": "<адрес_получателя>", "amount": 10, "private_key": "<ваш_приватный_ключ>"}'
 ```
-## Example of a successful response
-```json
-{
-  "jsonrpc": "2.0",
-  "result": "success",
-  "id": 2
-}
-```
-## Error example
-```json
-{
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -1,
-    "message": "Low difficulty"
-  },
-  "id": 2
-}
-```
-## 📋 REST endpoints (without authentication)
-These endpoints are available via HTTP (or HTTPS) and do not require authorization, but have a rate‑limit (100 requests per minute from one IP).
-
-| URL | Method | Description |
-|-----|--------|-------------|
-| /info | GET | General information about the node (height, complexity) |
-| /balance/<address> | GET | Balance of the specified address (available/locked) |
-| /history/<address> | GET | Transaction history at |
-| /utxos/<address> | GET | The UTXO list for the address |
-| /create_transaction | POST | Create and sign a transaction |
-| /send_transaction | POST | Send the transaction to the mempool |
-
-Important: The private key for /create_transaction is passed in the request body. Use this endpoint only in a secure environment (such as locally or with HTTPS).
-
-## ⛏️ Mining
-##CPU mining
-The built-in miner starts automatically (unless --no-mine is specified).
-It uses the transaction pool from the mempool and tries to find a block for the specified address.
-
-## ASIC mining (Stratum)
-Start a node with --stratum-port 3333 and configure your ASIC miner to the address:
-
-```text
-stratum+tcp://<IP_node>:3333
-```
-The miner must support the Stratum v1. protocol.
-After authorization, it will receive tasks (mining.notify) and send solutions (mining.submit).
-
-## 🔗 P2P network
-The node automatically connects to other nodes via port 8333.
-The list of known peers is stored in known_peers.json.
-Supported:
-
-+ Block and transaction exchange
-
-+ Chain synchronization
-
-+ IP ban when limits are exceeded
-
-+ Periodic reconnect
-
-+ To manually connect to a peer:
+## ⛏️ Майнинг
+### Чтобы добыть блок, отправьте POST‑запрос с вашим адресом:
 
 ```bash
-python main.py --connect 192.168.1.10:8333
+curl -X POST http://localhost:5000/mine \
+  -H "Content-Type: application/json" \
+  -d '{"address": "<ваш_адрес>"}'
 ```
+После успешного майнинга вы получите награду (125 WKC), которая придёт на ваш адрес частями (вестинг).
 
-## 🧪 Testing
-Run all tests:
+## 🌐 Веб‑эксплорер
+### Откройте в браузере http://ваш_сервер/ — вы увидите:
 
-```bash
-python -m unittest tests.py
-```
-Coverage includes:
++ Текущую высоту блокчейна.
 
-+ Serialization/deserialization
++ Хешрейт сети (в MH/s).
 
-+ Signatures and verification
++ Сложность (target).
 
-+ Adding blocks
++ Количество майнеров, подключённых к пулу.
 
-+ Mempool and UTXO operations
++ Таблицу последних блоков.
 
-+API (partially)
++ Все данные обновляются каждые 10 секунд автоматически.
 
-+ P2P (skipped on Windows, but working)
 
-## Technical details
-The consensus algorithm
-+ Proof‑of‑Work – SHA‑256d, the target is recalculated every 10 blocks.
+## 🧰 API (для разработчиков)
+Документация API доступна по адресу:
+http://ваш_сервер/ — все эндпоинты работают по HTTP.
 
-+ The maximum change in difficulty is 4 times.
+### Основные пути:
 
-+ The block time is 150 seconds (configurable).
++ GET /info — общая информация.
 
-## Reward and vesting
-+ The reward for the block is 125 WKC.
++ GET /blocks?limit=20&offset=0 — список блоков.
 
-+ Distributed into 5 parts with lock periods: [0, 4032, 8064, 12096, 16128] blocks.
++ GET /block/<height> — данные блока.
 
-+ Total supply is 21,000,000 WKC.
++ GET /transaction/<tx_hash> — данные транзакции.
 
-## Keeping
-+ The blockchain is saved in a binary file blockchain_data.bin using msgpack + zlib + sha256 checksum.
++ GET /address/<address>/utxo — непотраченные выходы.
 
-## 🤝 Contribution
-The project is open for improvements!
- If you find a bug or want to add a new feature, create an Issue or Pull Request.
++ GET /address/<address>/transactions — история адреса.
 
-Follow these guidelines:
++ GET /network-stats — расширенная статистика (хешрейт, сложность, майнеры).
 
-+ Use PEP‑8 code style
++ POST /wallet/create — создать кошелёк.
 
-+ Document new features
++ POST /wallet/<address>/send — отправить монеты.
 
-+ Write tests
++ POST /mine — запустить майнинг.
 
-## 📄 License
-The project is distributed under the MIT license. Details in the LICENSE file.
+### 🛠️ Конфигурация
+## Все настройки хранятся в файле config.py:
 
-## 🙏 Thanks
- Inspired by Bitcoin and its open ecosystem.
++ BLOCK_TIME_SEC — целевое время между блоками (сек).
 
- Uses libraries: ecdsa, cryptography, bip_utils, msgpack, flask, requests.
++ INITIAL_DIFFICULTY_TARGET — начальная сложность (чем меньше число, тем сложнее).
 
-## If the project is useful to you, give it a ⭐ on GitHub!
- 
++ DIFFICULTY_ADJUSTMENT_INTERVAL — через сколько блоков пересчитывается сложность.
+
++ REWARD — награда за блок.
+
++ VESTING_PERIODS — периоды блокировки награды (частичная разблокировка).
+
+📄 Лицензия
+Проект распространяется под лицензией MIT — вы можете использовать, модифицировать и распространять код без ограничений.
+
+## ❓ Часто задаваемые вопросы
+### Где хранятся блоки?
++ В SQLite‑базе blockchain.db в папке проекта.
+
+#### Можно ли майнить на GPU?
++ Нет, в этой версии только CPU‑майнинг, он нужен для демонстрации, а не для высокой производительности.
+
+### Как подключить другой майнер?
++ Используйте Stratum‑протокол (порт 3333). Любой совместимый майнер может подключиться.
+
+### Как обновить ноду до новой версии?
++ Зайдите в папку проекта, выполните git pull, перезапустите сервис.
+
+###Безопасно ли это?
++ Это учебный проект, не используйте его для реальных ценностей.
+
+## WorldKitCoin — блокчейн, который можно запустить за 5 минут.
