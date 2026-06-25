@@ -8,6 +8,7 @@ import json
 app = Flask(__name__)
 blockchain = None
 p2p_server = None
+stratum_server = None
 
 def set_blockchain(bc: Blockchain):
     global blockchain
@@ -16,6 +17,10 @@ def set_blockchain(bc: Blockchain):
 def set_p2p(p2p):
     global p2p_server
     p2p_server = p2p
+
+def set_stratum(srv):
+    global stratum_server
+    stratum_server = srv
 
 # === Веб-интерфейс эксплорера ===
 @app.route('/')
@@ -42,7 +47,6 @@ def get_info():
 def get_balance(address):
     if not blockchain:
         return jsonify({"error": "Blockchain not initialized"}), 500
-    # Проверка длины адреса (128 или 130)
     if len(address) not in (128, 130) or not all(c in '0123456789abcdefABCDEF' for c in address):
         return jsonify({"error": "Invalid address format"}), 400
     height = blockchain.get_block_height()
@@ -180,6 +184,8 @@ def network_stats():
         hashrate = (target * 2**32) / avg_time
 
     peers = p2p_server.get_peers_list() if p2p_server else []
+    miners = stratum_server.get_miner_count() if stratum_server else 0
+
     return jsonify({
         'height': height,
         'total_supply': blockchain.total_supply,
@@ -190,7 +196,8 @@ def network_stats():
         'hashrate': hashrate,
         'avg_block_time': avg_time,
         'peer_count': len(peers),
-        'peers': peers
+        'peers': peers,
+        'miners': miners
     })
 
 @app.route('/mempool', methods=['GET'])
@@ -264,7 +271,6 @@ def send_transaction():
     if not all([from_addr, to_pubkey, amount is not None, private_key]):
         return jsonify({"error": "Missing fields: 'from', 'to_pubkey', 'amount', 'private_key'"}), 400
 
-    # Проверка длины адресов (128 или 130)
     if len(from_addr) not in (128, 130) or len(to_pubkey) not in (128, 130):
         return jsonify({"error": "Invalid address format (must be 128 or 130 hex chars)"}), 400
 
@@ -301,7 +307,6 @@ def mine_block():
     address = data.get('address')
     if not address:
         return jsonify({"error": "Missing 'address' field"}), 400
-    # Проверка длины адреса (128 или 130)
     if len(address) not in (128, 130) or not all(c in '0123456789abcdefABCDEF' for c in address):
         return jsonify({"error": "Invalid address format (must be 128 or 130 hex chars)"}), 400
 
@@ -322,6 +327,15 @@ def get_peers():
     if not p2p_server:
         return jsonify({"error": "P2P not initialized"}), 500
     return jsonify({"peers": p2p_server.get_peers_list()}), 200
+
+@app.route('/miners', methods=['GET'])
+def get_miners():
+    if not stratum_server:
+        return jsonify({"error": "Stratum not initialized"}), 500
+    return jsonify({
+        'count': stratum_server.get_miner_count(),
+        'addresses': stratum_server.get_miner_addresses()
+    })
 
 # === НОВЫЕ ЭНДПОИНТЫ ДЛЯ КОШЕЛЬКА ===
 @app.route('/wallet/create', methods=['POST'])
@@ -356,15 +370,10 @@ def wallet_import():
 
 @app.route('/wallet/<address>/balance', methods=['GET'])
 def wallet_balance(address):
-    """Возвращает баланс адреса (использует существующий /balance)"""
     return get_balance(address)
 
 @app.route('/wallet/<address>/send', methods=['POST'])
 def wallet_send(address):
-    """
-    Отправляет монеты с указанного адреса.
-    Ожидает JSON: { "to": "<адрес получателя>", "amount": число, "private_key": "<приватный ключ>" }
-    """
     if not blockchain:
         return jsonify({"error": "Blockchain not initialized"}), 500
     data = request.get_json()
@@ -378,7 +387,6 @@ def wallet_send(address):
     if not all([to_address, amount is not None, privkey]):
         return jsonify({"error": "Missing fields: 'to', 'amount', 'private_key'"}), 400
 
-    # Проверка длины адресов (128 или 130)
     if len(address) not in (128, 130) or len(to_address) not in (128, 130):
         return jsonify({"error": "Invalid address format (must be 128 or 130 hex chars)"}), 400
 
